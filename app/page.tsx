@@ -2,8 +2,24 @@
 
 import { useEffect, useState } from "react";
 
+type ImageType = {
+  id: number;
+  P?: {
+    url: string;
+  };
+  attributes?: {
+    P?: {
+      data?: {
+        attributes?: {
+          url: string;
+        };
+      };
+    };
+  };
+};
+
 export default function Home() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const API_URL = "https://dogs-backend-bn8q.onrender.com";
@@ -36,8 +52,8 @@ export default function Home() {
         <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {data.map((item) => {
             const imgUrl =
-              item?.P?.url ||
               item?.attributes?.P?.data?.attributes?.url ||
+              item?.P?.url ||
               null;
 
             return (
@@ -46,7 +62,7 @@ export default function Home() {
                   <img
                     src={`${API_URL}${imgUrl}`}
                     className="w-full h-48 object-cover"
-                    alt="dog"
+                    alt="photo"
                   />
                 ) : (
                   <div className="h-48 flex items-center justify-center">
