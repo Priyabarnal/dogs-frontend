@@ -26,7 +26,9 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/exes?populate=*`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/exes?populate=*`
+      );
       const json = await res.json();
       setData(json.data || []);
     } catch (err) {
