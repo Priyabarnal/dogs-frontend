@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 
 type ImageType = {
   id: number;
-  P?: {
-    url: string;
-  };
   attributes?: {
     P?: {
       data?: {
@@ -22,13 +19,11 @@ export default function Home() {
   const [data, setData] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "https://dogs-backend-bn8q.onrender.com";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const fetchData = async () => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/exes?populate=*`
-      );
+      const res = await fetch(`${API_URL}/api/exes?populate=*`);
       const json = await res.json();
       setData(json.data || []);
     } catch (err) {
@@ -54,9 +49,7 @@ export default function Home() {
         <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {data.map((item) => {
             const imgUrl =
-              item?.attributes?.P?.data?.attributes?.url ||
-              item?.P?.url ||
-              null;
+              item.attributes?.P?.data?.attributes?.url || null;
 
             return (
               <div key={item.id} className="shadow rounded-xl overflow-hidden">
