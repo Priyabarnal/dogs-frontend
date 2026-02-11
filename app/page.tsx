@@ -4,20 +4,22 @@ import { useEffect, useState } from "react";
 
 type ImageType = {
   id: number;
-  attributes?: any; // flexible, kyunki exact structure unknown
+  P?: {
+    url: string;
+  };
 };
 
 export default function Home() {
   const [data, setData] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "https://dogs-backend-bn8q.onrender.com";
+  const API_URL = "https://dogs-backend-bn8q.onrender.com"; // Direct URL
 
   const fetchData = async () => {
     try {
       const res = await fetch(`${API_URL}/api/exes?populate=*`);
       const json = await res.json();
-      console.log("Strapi response:", json); // 🔥 check exact structure
+      console.log("🔥 JSON response:", json); // optional, check console
       setData(json.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -30,21 +32,11 @@ export default function Home() {
     fetchData();
   }, []);
 
+  // Helper to build full URL
   const getFullImageUrl = (imgPath: string | undefined) => {
     if (!imgPath) return "";
     if (imgPath.startsWith("http")) return imgPath;
     return `${API_URL}${imgPath}`;
-  };
-
-  // Helper to safely get image URL from nested attributes
-  const extractImageUrl = (item: ImageType) => {
-    // Try multiple common paths
-    return (
-      item.attributes?.P?.data?.attributes?.url || // original
-      item.attributes?.image?.data?.attributes?.url || // alternate common name
-      item.attributes?.P?.url || // fallback
-      null
-    );
   };
 
   return (
@@ -56,7 +48,8 @@ export default function Home() {
       ) : (
         <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {data.map((item) => {
-            const imgUrl = extractImageUrl(item);
+            // ✅ Correct path for image from your JSON
+            const imgUrl = item.P?.url;
             return (
               <div key={item.id} className="shadow rounded-xl overflow-hidden">
                 {imgUrl ? (
