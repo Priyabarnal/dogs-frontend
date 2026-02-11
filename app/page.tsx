@@ -4,29 +4,20 @@ import { useEffect, useState } from "react";
 
 type ImageType = {
   id: number;
-  attributes?: {
-    P?: {
-      data?: {
-        attributes?: {
-          url: string;
-        };
-      };
-    };
-  };
+  attributes?: any; // flexible, kyunki exact structure unknown
 };
 
 export default function Home() {
   const [data, setData] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 Direct API URL
   const API_URL = "https://dogs-backend-bn8q.onrender.com";
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/exes?populate=P`);
+      const res = await fetch(`${API_URL}/api/exes?populate=*`);
       const json = await res.json();
-      console.log("Strapi response:", json); // 🔥 check console if images exist
+      console.log("Strapi response:", json); // 🔥 check exact structure
       setData(json.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -39,11 +30,21 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Helper to build full image URL
   const getFullImageUrl = (imgPath: string | undefined) => {
     if (!imgPath) return "";
     if (imgPath.startsWith("http")) return imgPath;
     return `${API_URL}${imgPath}`;
+  };
+
+  // Helper to safely get image URL from nested attributes
+  const extractImageUrl = (item: ImageType) => {
+    // Try multiple common paths
+    return (
+      item.attributes?.P?.data?.attributes?.url || // original
+      item.attributes?.image?.data?.attributes?.url || // alternate common name
+      item.attributes?.P?.url || // fallback
+      null
+    );
   };
 
   return (
@@ -55,7 +56,7 @@ export default function Home() {
       ) : (
         <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {data.map((item) => {
-            const imgUrl = item.attributes?.P?.data?.attributes?.url;
+            const imgUrl = extractImageUrl(item);
             return (
               <div key={item.id} className="shadow rounded-xl overflow-hidden">
                 {imgUrl ? (
@@ -65,7 +66,7 @@ export default function Home() {
                     alt="photo"
                   />
                 ) : (
-                  <div className="h-48 flex items-center justify-center">
+                  <div className="h-48 flex items-center justify-center bg-gray-200">
                     No image
                   </div>
                 )}
