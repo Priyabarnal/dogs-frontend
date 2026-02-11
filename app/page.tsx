@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 
 type ImageType = {
   id: number;
-  P?: {
-    url: string;
-  };
   attributes?: {
     P?: {
       data?: {
@@ -22,14 +19,14 @@ export default function Home() {
   const [data, setData] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 Direct API URL
   const API_URL = "https://dogs-backend-bn8q.onrender.com";
 
- const fetchData = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/exes?populate=*`
-      );
+      const res = await fetch(`${API_URL}/api/exes?populate=P`);
       const json = await res.json();
+      console.log("Strapi response:", json); // 🔥 check console if images exist
       setData(json.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -42,27 +39,28 @@ export default function Home() {
     fetchData();
   }, []);
 
+  // Helper to build full image URL
+  const getFullImageUrl = (imgPath: string | undefined) => {
+    if (!imgPath) return "";
+    if (imgPath.startsWith("http")) return imgPath;
+    return `${API_URL}${imgPath}`;
+  };
+
   return (
     <main className="min-h-screen p-6">
-      <h1 className="text-4xl font-bold text-center mb-10">
-        📸 Photo Gallery
-      </h1>
+      <h1 className="text-4xl font-bold text-center mb-10">📸 Photo Gallery</h1>
 
       {loading ? (
         <p className="text-center">Loading...</p>
       ) : (
         <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {data.map((item) => {
-            const imgUrl =
-              item?.attributes?.P?.data?.attributes?.url ||
-              item?.P?.url ||
-              null;
-
+            const imgUrl = item.attributes?.P?.data?.attributes?.url;
             return (
               <div key={item.id} className="shadow rounded-xl overflow-hidden">
                 {imgUrl ? (
                   <img
-                    src={`${API_URL}${imgUrl}`}
+                    src={getFullImageUrl(imgUrl)}
                     className="w-full h-48 object-cover"
                     alt="photo"
                   />
